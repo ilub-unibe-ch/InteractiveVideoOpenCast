@@ -65,8 +65,12 @@ class ilInteractiveVideoOpenCast implements ilInteractiveVideoSource
 		global $ilDB;
 		$result = $ilDB->query('SELECT opc_id, opc_url FROM '.self::TABLE_NAME.' WHERE obj_id = '.$ilDB->quote($obj_id, 'integer'));
 		$row = $ilDB->fetchAssoc($result);
-		$this->setopcId($row['opc_id']);
-		$this->setopcUrl($row['opc_url']);
+        if(isset($row['opc_id'])) {
+            $this->setopcId($row['opc_id']);
+        }
+        if(isset($row['opc_url'])) {
+            $this->setopcUrl($row['opc_url']);
+        }
 	}
 
 	/**
@@ -110,10 +114,17 @@ class ilInteractiveVideoOpenCast implements ilInteractiveVideoSource
 	 */
 	public function doUpdateVideoSource($obj_id)
 	{
-		if(ilUtil::stripSlashes($_POST['opc_id']))
+        global $DIC;
+        $post = $DIC->http()->wrapper()->post();
+		if($post->has('opc_id'))
 		{
-			$opc_id = ilUtil::stripSlashes($_POST['opc_id']);
-			$opc_url =ilUtil::stripSlashes($_POST['opc_url']);
+			$opc_id = $post->retrieve('opc_id', $DIC->refinery()->kindlyTo()->string());
+            if($post->has('opc_url')) {
+                $opc_url = $post->retrieve('opc_url', $DIC->refinery()->kindlyTo()->string());
+            } else {
+                $opc_url = '';
+            }
+
 		}
 		else
 		{

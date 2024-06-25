@@ -20,7 +20,8 @@ il.opcMediaPortalAjaxQuery = (function (scope) {
             config = {backdrop: 'static', keyboard: false};
         }
         pro.displayWaitBox();
-        $.get( il.opcMediaPortalAjaxQueryURL, function( data ) {
+        let url = document.querySelector('#iv-opc-url').getAttribute("data-iv-opencast-url");
+        $.get( url, function( data ) {
             $('.modal-body').html( data );
             $('#OpencastSelectionModal').modal(config, 'show');
             $('.modal-body').css('overflow', 'auto')
@@ -43,8 +44,8 @@ il.opcMediaPortalAjaxQuery = (function (scope) {
     }
 
     pro.addActionToRow = function(){
-        $('.ocpc_table_row_selectable').off('click');
-        $('.ocpc_table_row_selectable').on('click', function(event) {
+        $('.il-std-item-container').off('click');
+        $('.il-std-item-container').on('click', function(event) {
             pro.parseEventId($(this));
             event.preventDefault();
         });
@@ -56,10 +57,10 @@ il.opcMediaPortalAjaxQuery = (function (scope) {
     }
 
     pro.parseEventId = function(that){
-        let url = that.data('href');
-        let event_id = url.split('event_id=');
-        let title = that.find('.std')[1];
-        title =  $(title).html().replace(/\t/g, '')
+        let url = that.find('.il-item-title a').attr('href');
+        let event_id = url.split('xvid_id_url=');
+        let title = that.find('.il-item-title a').html();
+        title =  title.replace(/\t/g, '')
         if(event_id[1] !== null && event_id[1] !== ''){
             pro.addEventIdToForm(event_id[1], title);
         }
