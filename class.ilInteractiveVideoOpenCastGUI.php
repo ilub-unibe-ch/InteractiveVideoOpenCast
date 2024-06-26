@@ -6,19 +6,18 @@ use ILIAS\Data\URI;
 
 class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
 {
+    public const CMD_CANCEL = "cancel";
+    public const CMD_CREATE = "create";
+    public const CMD_EDIT = "edit";
 
-    const CMD_CANCEL = "cancel";
-    const CMD_CREATE = "create";
-    const CMD_EDIT = "edit";
-
-    const CMD_UPDATE = "update";
-    const CMD_APPLY_FILTER = "applyFilter";
-    const CMD_RESET_FILTER = "resetFilter";
-    const CMD_SAVE = 'save';
-    const CMD_INDEX = 'index';
-    const OPC_DUMMY_ID = 'opc_dummy';
-    const XVID_ID_URL = 'xvid_id_url';
-    const XVID_OPC_URL = 'opc_url';
+    public const CMD_UPDATE = "update";
+    public const CMD_APPLY_FILTER = "applyFilter";
+    public const CMD_RESET_FILTER = "resetFilter";
+    public const CMD_SAVE = 'save';
+    public const CMD_INDEX = 'index';
+    public const OPC_DUMMY_ID = 'opc_dummy';
+    public const XVID_ID_URL = 'xvid_id_url';
+    public const XVID_OPC_URL = 'opc_url';
 
     protected ?Container $dic = null;
 
@@ -32,10 +31,10 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
      * @throws ilCtrlException
      * @throws ilTemplateException
      */
-	public function getForm($option, $obj_id) : ilRadioOption
-	{
-		global $tpl;
-		$this->dic = $this->getDIC();
+    public function getForm($option, $obj_id): ilRadioOption
+    {
+        global $tpl;
+        $this->dic = $this->getDIC();
         $ctrl = $this->dic->ctrl();
 
         $ctrl->setParameter(new ilObjInteractiveVideoGUI(), 'xvid_plugin_ctrl', ilInteractiveVideoOpenCastGUI::class);
@@ -52,7 +51,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
             ], $this->dic->ui()->mainTemplate());
 
         $get = $this->dic->http()->wrapper()->query();
-        if($get->has('cmd') && $get->retrieve('cmd', $this->dic->refinery()->kindlyTo()->string()) === 'create'){
+        if($get->has('cmd') && $get->retrieve('cmd', $this->dic->refinery()->kindlyTo()->string()) === 'create') {
             $info_test = new ilNonEditableValueGUI('', 'oc_info_text');
             $info_test->setValue(ilInteractiveVideoPlugin::getInstance()->txt('please_create_object_first'));
             $option->addSubItem($info_test);
@@ -62,7 +61,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
             $option->addSubItem($opc_inject_text);
         } else {
             $tpl->addJavaScript('Customizing/global/plugins/Services/Repository/RepositoryObject/InteractiveVideo/VideoSources/plugin/InteractiveVideoOpenCast/js/opcMediaPortalAjaxQuery.js');
-            $opc_id = new ilHiddenInputGUI( 'opc_id');
+            $opc_id = new ilHiddenInputGUI('opc_id');
             $option->addSubItem($opc_id);
             $info_test = new ilNonEditableValueGUI('', 'opc_id_text');
             $info_test->setValue('');
@@ -78,7 +77,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
         $modal->setType(ilModalGUI::TYPE_LARGE);
         $tpl_modal->setVariable('MODAL', $modal->getHTML());
 
-        $this->ajax_url = $this->dic->ctrl()->getLinkTargetByClass(['ilRepositoryGUI', 'ilObjInteractiveVideoGUI'], 'getAjaxOpenCastTable','', true, false);
+        $this->ajax_url = $this->dic->ctrl()->getLinkTargetByClass(['ilRepositoryGUI', 'ilObjInteractiveVideoGUI'], 'getAjaxOpenCastTable', '', true, false);
         $tpl_modal->setVariable('OPENCAST_AJAX_URL', $this->ajax_url);
 
         $this->dic->ui()->mainTemplate()->setVariable('WEBDAV_MODAL', $tpl_modal->get());
@@ -87,14 +86,15 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
         $opc_inject_text->setValue($action_text);
         $option->addSubItem($opc_inject_text);
 
-        if($object->getOpcId() === self::OPC_DUMMY_ID){
+        if($object->getOpcId() === self::OPC_DUMMY_ID) {
             $this->dic->ui()->mainTemplate()->addOnLoadCode('il.opcMediaPortalAjaxQuery.openSelectionModal(true);');
         }
 
-		return $option;
-	}
+        return $option;
+    }
 
-	public function getAjaxOpenCastTable(){
+    public function getAjaxOpenCastTable()
+    {
         $dic = $this->getDIC();
         $get = $dic->http()->wrapper()->query();
         if($get->has(self::XVID_ID_URL)) {
@@ -106,36 +106,35 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
         exit();
     }
 
-	/**
-	 * @param ilPropertyFormGUI $form
-	 * @return bool
-	 */
-	public function checkForm($form) :bool
-	{
+    /**
+     * @param ilPropertyFormGUI $form
+     * @return bool
+     */
+    public function checkForm($form): bool
+    {
         $dic = $this->getDIC();
         $post = $dic->http()->wrapper()->post();
         if($post->has(self::XVID_OPC_URL)) {
             $opc_url = $post->retrieve(self::XVID_OPC_URL, $dic->refinery()->kindlyTo()->string());
             $opc_url = ilUtil::stripSlashes($opc_url);
-            if($opc_url != '' )
-            {
+            if($opc_url != '') {
                 return true;
             }
         }
-		return false;
-	}
-	
+        return false;
+    }
 
-	/**
-	 * @param ilTemplate $tpl
-	 * @return ilTemplate
-	 */
-	public function addPlayerElements($tpl)
-	{
-		$tpl->addJavaScript('Customizing/global/plugins/Services/Repository/RepositoryObject/InteractiveVideo/VideoSources/plugin/InteractiveVideoOpenCast/js/jquery.InteractiveVideoOpenCastPlayer.js');
+
+    /**
+     * @param ilTemplate $tpl
+     * @return ilTemplate
+     */
+    public function addPlayerElements($tpl)
+    {
+        $tpl->addJavaScript('Customizing/global/plugins/Services/Repository/RepositoryObject/InteractiveVideo/VideoSources/plugin/InteractiveVideoOpenCast/js/jquery.InteractiveVideoOpenCastPlayer.js');
         ilPlayerUtil::initMediaElementJs($tpl, false);
-		return $tpl;
-	}
+        return $tpl;
+    }
 
     /**
      * @param                       $player_id
@@ -143,58 +142,58 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
      * @return ilTemplate
      */
     public function getPlayer($player_id, $obj)
-	{
-		$player		= new ilTemplate('Customizing/global/plugins/Services/Repository/RepositoryObject/InteractiveVideo/VideoSources/plugin/InteractiveVideoOpenCast/tpl/tpl.video.html', false, false);
-		$instance	= new ilInteractiveVideoOpenCast();
-		$instance->doReadVideoSource($obj->getId());
+    {
+        $player		= new ilTemplate('Customizing/global/plugins/Services/Repository/RepositoryObject/InteractiveVideo/VideoSources/plugin/InteractiveVideoOpenCast/tpl/tpl.video.html', false, false);
+        $instance	= new ilInteractiveVideoOpenCast();
+        $instance->doReadVideoSource($obj->getId());
         if($instance->getOpcId() !== self::OPC_DUMMY_ID) {
             $player->setVariable('PLAYER_ID', $player_id);
             $url = xoctSecureLink::signPlayer($this->getVideoUrl($instance->getOpcId()));
             # $signed_url = xoctConf::getConfig(xoctConf::F_SIGN_DOWNLOAD_LINKS) ? xoctSecureLink::signDownload($url) : $url;
             $player->setVariable('OPC_URL', $url);
         }
-		return $player;
-	}
+        return $player;
+    }
 
-	/**
-	 * @param array                 $a_values
-	 * @param ilObjInteractiveVideo $obj
-	 */
-	public function getEditFormCustomValues(array &$a_values, $obj)
-	{
-		$instance = new ilInteractiveVideoOpenCast();
-		$instance->doReadVideoSource($obj->getId());
+    /**
+     * @param array                 $a_values
+     * @param ilObjInteractiveVideo $obj
+     */
+    public function getEditFormCustomValues(array &$a_values, $obj)
+    {
+        $instance = new ilInteractiveVideoOpenCast();
+        $instance->doReadVideoSource($obj->getId());
 
         $a_values[ilInteractiveVideoOpenCast::FORM_ID_FIELD] = '';
-        if($instance->getOpcId() !== self::OPC_DUMMY_ID){
+        if($instance->getOpcId() !== self::OPC_DUMMY_ID) {
             $a_values[ilInteractiveVideoOpenCast::FORM_ID_FIELD] = $instance->getOpcId();
         }
 
-		$a_values[ilInteractiveVideoOpenCast::FORM_URL_FIELD] = $instance->getOpcUrl();
-	}
+        $a_values[ilInteractiveVideoOpenCast::FORM_URL_FIELD] = $instance->getOpcUrl();
+    }
 
-	/**
-	 * @param $form
-	 */
-	public function getConfigForm($form)
-	{
+    /**
+     * @param $form
+     */
+    public function getConfigForm($form)
+    {
         $dic = $this->getDIC();
         $get = $dic->http()->wrapper()->query();
-        if( $get->has(VideoSearchTableGUI::GET_PARAM_EVENT_ID)) {
+        if($get->has(VideoSearchTableGUI::GET_PARAM_EVENT_ID)) {
             $event_id = $get->retrieve(VideoSearchTableGUI::GET_PARAM_EVENT_ID, $dic->refinery()->kindlyTo()->string());
             $event_id = ilUtil::stripSlashes($event_id);
-         }
-	}
+        }
+    }
 
-	/**
-	 * @return boolean
-	 */
-	public function hasOwnConfigForm() : bool
-	{
-		return false;
-	}
+    /**
+     * @return boolean
+     */
+    public function hasOwnConfigForm(): bool
+    {
+        return false;
+    }
 
-    protected function getTable() : string
+    protected function getTable(): string
     {
         $dic = $this->getDIC();
         $this->container = Init::init($dic);
@@ -219,7 +218,8 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
      * @throws ilException
      * @throws xoctException
      */
-    protected function getVideoUrl(string $event_id) : string {
+    protected function getVideoUrl(string $event_id): string
+    {
 
         $event = xoctInternalAPI::getInstance()->events()->read($event_id);
         $download_dtos = $event->publications()->getDownloadDtos(); // sortiert nach Auflösung (descending)
@@ -237,7 +237,8 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
         return '';
     }
 
-    private function getDIC() {
+    private function getDIC()
+    {
         if($this->dic === null) {
             global $DIC;
             $this->dic = $DIC;
