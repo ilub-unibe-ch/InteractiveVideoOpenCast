@@ -31,8 +31,8 @@ class ilInteractiveVideoOpenCastXMLParser extends ilInteractiveVideoXMLParser
     public function handlerBeginTag($xmlParser, $tagName, $tagAttributes): void
     {
         switch($tagName) {
-            case 'OpcId':
-            case 'OpcURL':
+            case 'opcId':
+            case 'opcURL':
             case 'VideoSourceObject':
                 $this->cdata = '';
                 break;
@@ -46,14 +46,15 @@ class ilInteractiveVideoOpenCastXMLParser extends ilInteractiveVideoXMLParser
     public function handlerEndTag($xmlParser, $tagName): void
     {
         switch($tagName) {
-            case 'OpcId':
+            case 'opcId':
                 $this->opc_obj->setopcId(trim($this->cdata));
                 break;
-            case 'OpcURL':
+            case 'opcURL':
                 $this->opc_obj->setopcUrl(trim($this->cdata));
                 break;
             case 'VideoSourceObject':
-                $tmp = $this->cdata;
+                $this->inVideoSourceTag = false;
+                parent::setHandlers($xmlParser);
                 break;
         }
     }

@@ -126,8 +126,8 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
 
 
     /**
-     * @param ilTemplate $tpl
-     * @return ilTemplate
+     * @param ilGlobalTemplate $tpl
+     * @return ilGlobalTemplate
      */
     public function addPlayerElements($tpl)
     {
@@ -137,9 +137,11 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
     }
 
     /**
-     * @param                       $player_id
-     * @param ilObjInteractiveVideo $obj
+     * @param $player_id
+     * @param $obj
      * @return ilTemplate
+     * @throws ilException
+     * @throws xoctException
      */
     public function getPlayer($player_id, $obj)
     {

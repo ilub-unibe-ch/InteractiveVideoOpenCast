@@ -222,7 +222,7 @@ class ilInteractiveVideoOpenCast implements ilInteractiveVideoSource
     /**
      * @param string $opc_id
      */
-    public function setopcId($opc_id)
+    public function setopcId(string $opc_id)
     {
         $this->opc_id = $opc_id;
     }
@@ -238,7 +238,7 @@ class ilInteractiveVideoOpenCast implements ilInteractiveVideoSource
     /**
      * @param string $opc_url
      */
-    public function setopcUrl($opc_url)
+    public function setopcUrl(string $opc_url)
     {
         $this->opc_url = $opc_url;
     }

@@ -1,6 +1,6 @@
 # OpenCast InteractiveVideo Plugin
 ILIAS OpenCast Plugin for Interactive Video Plugin
-Only compatible with InteractiveVideo version 2.6.0 and higher or the '6_x' branch of the InteractiveVideo plugin
+Only compatible with InteractiveVideo version 3.5.0 and higher or the 'r8' branch of the InteractiveVideo plugin
 This plugin need the OpenCast and OpenCastPageComponent plugin
 
 ## Installation Instructions
