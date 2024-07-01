@@ -34,7 +34,7 @@ il.InteractiveVideoOpencastPlayer = (function (scope) {
 						setCurrentTimeCallback: (function (time) {
 							player.currentTime = time;
 						}),
-						initPlayerCallback         : il.InteractiveVideoSimplePlayer.initPlayer
+						initPlayerCallback         : il.InteractiveVideoOpencastPlayer.initPlayer
 					};
 					il.InteractiveVideoPlayerAbstract.readyCallback(player_id, '.plyr__poster');
 					il.InteractiveVideo[player_id].player.on('play', event => {
