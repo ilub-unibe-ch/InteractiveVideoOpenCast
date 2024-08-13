@@ -7,6 +7,7 @@ use srag\Plugins\Opencast\Model\User\xoctUser;
 use srag\Plugins\Opencast\Model\Event\EventAPIRepository;
 use srag\Plugins\Opencast\Model\Event\Event;
 use ILIAS\UI\Implementation\Component\Item\Group;
+use srag\Plugins\Opencast\Model\Series\SeriesAPIRepository;
 
 class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
 {
@@ -258,7 +259,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
     ): Group {
         $items = [];
 
-        $t = fn(string $key): string => $key;
+        $t = fn(string $key): string => ilInteractiveVideoPlugin::getInstance()->txt($key);
 
         /** @var Event $event */
         foreach ($this->getEvents() as $event) {
@@ -293,7 +294,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
         }
 
         return $this->dic->ui()->factory()->item()->group(
-            "Events",
+            $t("event_modal_heading"),
             $items
         );
     }
@@ -305,7 +306,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
             return $this->series_name_cache[$series_id];
         }
 
-        $series_name = "Test";//Init::init($this->dic)->get(EventAPIRepository::class)->find($series_id)->getMetadata()->getField('title')->getValue();
+        $series_name = Init::init($this->dic)->get(SeriesAPIRepository::class)->find($series_id)->getMetadata()->getField('title')->getValue();
 
         return $this->series_name_cache[$series_id] = $series_name;
     }
