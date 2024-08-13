@@ -3,6 +3,10 @@
 use ILIAS\DI\Container;
 use srag\Plugins\Opencast\Container\Init;
 use ILIAS\Data\URI;
+use srag\Plugins\Opencast\Model\User\xoctUser;
+use srag\Plugins\Opencast\Model\Event\EventAPIRepository;
+use srag\Plugins\Opencast\Model\Event\Event;
+use ILIAS\UI\Implementation\Component\Item\Group;
 
 class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
 {
@@ -21,6 +25,7 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
 
     protected ?Container $dic = null;
 
+    protected array $series_name_cache = [];
     protected string $ajax_url;
 
     /**
@@ -200,18 +205,109 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
         $dic = $this->getDIC();
         $this->container = Init::init($dic);
         $this->plugin = ilOpencastPageComponentPlugin::getInstance();
-        $ui = $this->container->uiIntegration($this->plugin);
+        //$ui = $this->container->uiIntegration($this->plugin);
         $dic->ctrl()->setParameter(new ilObjInteractiveVideoGUI(), 'xvid_plugin_ctrl', ilInteractiveVideoOpenCastGUI::class);
         $dic->ctrl()->setParameter(new ilObjInteractiveVideoGUI(), 'xvid_plugin_function', 'getAjaxOpenCastTable');
         $dic->ctrl()->setParameter(new ilObjInteractiveVideoGUI(), 'xvid_source_id', 'opc');
         $target_url = new URI(ILIAS_HTTP_PATH . '/' . $dic->ctrl()->getLinkTarget(new ilObjInteractiveVideoGUI(), '#'));
 
-        return $dic->ui()->renderer()->render([
-                    $ui->mine()->asItemGroup(
-                        $target_url,
-                        self::XVID_ID_URL
+        return $dic->ui()->renderer()->render([$this->asItemGroup($target_url,self::XVID_ID_URL)]);
+    }
+
+    private function getEvents(
+        int $offset = 0,
+        int $limit = 1000,
+        string $sort = 'title',
+        string $order = 'ASC'
+    ): array {
+        // the api doesn't deliver a max count, so we fetch (limit + 1) to see if there should be a 'next' page
+        try {
+            $xoct_user = xoctUser::getInstance($this->container->ilias()->user());
+            $identifier = $xoct_user->getIdentifier();
+            if ($identifier === '') {
+                return [];
+            }
+
+            $filter = $this->filter_data ?? [];
+            $filter = array_filter($filter, static fn($value): bool => $value !== '');
+            $filter['status'] = 'EVENTS.EVENTS.STATUS.PROCESSED';
+
+
+            $events = (array) Init::init($this->dic)->get(EventAPIRepository::class)->getFiltered(
+                $filter,
+                '',
+                [$xoct_user->getUserRoleName()],
+                $offset,
+                $limit,
+                "$sort:$order",
+                true
+            );
+
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return array_filter($events, static function (Event $event): bool {
+            return $event->getProcessingState() === Event::STATE_SUCCEEDED;
+        });
+    }
+
+    public function asItemGroup(
+        URI $target_url,
+        string $parameter_name = 'event_id'
+    ): Group {
+        $items = [];
+
+        $t = fn(string $key): string => $key;
+
+        /** @var Event $event */
+        foreach ($this->getEvents() as $event) {
+            $action = (string) $target_url->withParameter(
+                $parameter_name, $event->getIdentifier()
+            );
+            $items[] = $this->dic->ui()->factory()
+                ->item()
+                ->standard(
+                    $this->dic->ui()->factory()->link()->standard(
+                        $event->getTitle(),
+                        $action
                     )
-                ]);
+                )->withActions(
+                    $this->dic->ui()->factory()->dropdown()->standard([
+                        $this->dic->ui()->factory()->link()->standard(
+                            $t("select"),
+                            $action
+                        ),
+                    ])
+                )
+                ->withProperties([
+                    $t("event_date") => $event->getStart()->format('d.m.Y H:i'),
+                    $t("event_series") => $this->getSeriesName($event),
+                    $t("event_presenter") => implode(", ", $event->getPresenter()),
+                ])->withLeadImage(
+                    $this->dic->ui()->factory()->image()->responsive(
+                        $event->publications()->getThumbnailUrl(),
+                        'src'
+                    )->withAction($action)
+                );
+        }
+
+        return $this->dic->ui()->factory()->item()->group(
+            "Events",
+            $items
+        );
+    }
+
+    protected function getSeriesName(Event $event): string
+    {
+        $series_id = $event->getSeries();
+        if (isset($this->series_name_cache[$series_id])) {
+            return $this->series_name_cache[$series_id];
+        }
+
+        $series_name = "Test";//Init::init($this->dic)->get(EventAPIRepository::class)->find($series_id)->getMetadata()->getField('title')->getValue();
+
+        return $this->series_name_cache[$series_id] = $series_name;
     }
 
     /**
