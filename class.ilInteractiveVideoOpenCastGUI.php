@@ -306,8 +306,11 @@ class ilInteractiveVideoOpenCastGUI implements ilInteractiveVideoSourceGUI
             return $this->series_name_cache[$series_id];
         }
 
-        $series_name = Init::init($this->dic)->get(SeriesAPIRepository::class)->find($series_id)->getMetadata()->getField('title')->getValue();
-
+        try {
+            $series_name = Init::init($this->dic)->get(SeriesAPIRepository::class)->find($series_id)->getMetadata()->getField('title')->getValue();
+        } catch(Exception $e) {
+            $series_name = "Series not Found";
+        }
         return $this->series_name_cache[$series_id] = $series_name;
     }
 
